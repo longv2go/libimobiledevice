@@ -9,15 +9,15 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <stdio.h>
@@ -32,6 +32,7 @@
 #include <plist/plist.h>
 
 #ifdef WIN32
+#include <windows.h>
 #define S_IFLNK S_IFREG
 #define S_IFSOCK S_IFREG
 #endif
@@ -43,7 +44,11 @@ static int keep_crash_reports = 0;
 static int file_exists(const char* path)
 {
 	struct stat tst;
+#ifdef WIN32
+	return (stat(path, &tst) == 0);
+#else
 	return (lstat(path, &tst) == 0);
+#endif
 }
 
 static int extract_raw_crash_report(const char* filename) {
@@ -191,7 +196,9 @@ static int afc_client_copy_and_remove_crash_reports(afc_client_t afc, const char
 				}
 
 				/* create a symlink pointing to latest log */
-				symlink(b, target_filename);
+				if (symlink(b, target_filename) < 0) {
+					fprintf(stderr, "Can't create symlink to %s\n", b);
+				}
 #endif
 
 				if (!keep_crash_reports)
@@ -291,6 +298,7 @@ static void print_usage(int argc, char **argv)
 	printf("  -u, --udid UDID\ttarget specific device by its 40-digit device UDID\n");
 	printf("  -h, --help\t\tprints usage information\n");
 	printf("\n");
+	printf("Homepage: <http://libimobiledevice.org>\n");
 }
 
 int main(int argc, char* argv[]) {
@@ -367,6 +375,7 @@ int main(int argc, char* argv[]) {
 
 	lockdownd_error = lockdownd_client_new_with_handshake(device, &lockdownd, "idevicecrashreport");
 	if (lockdownd_error != LOCKDOWN_E_SUCCESS) {
+		fprintf(stderr, "ERROR: Could not connect to lockdownd, error code %d\n", lockdownd_error);
 		idevice_free(device);
 		return -1;
 	}

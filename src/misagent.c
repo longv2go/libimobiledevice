@@ -8,15 +8,15 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <string.h>
@@ -87,7 +87,7 @@ static misagent_error_t misagent_check_result(plist_t response, int* status_code
 	}
 }
 
-misagent_error_t misagent_client_new(idevice_t device, lockdownd_service_descriptor_t service, misagent_client_t *client)
+LIBIMOBILEDEVICE_API misagent_error_t misagent_client_new(idevice_t device, lockdownd_service_descriptor_t service, misagent_client_t *client)
 {
 	property_list_service_client_t plistclient = NULL;
 	misagent_error_t err = misagent_error(property_list_service_client_new(device, service, &plistclient));
@@ -103,14 +103,14 @@ misagent_error_t misagent_client_new(idevice_t device, lockdownd_service_descrip
 	return MISAGENT_E_SUCCESS;
 }
 
-misagent_error_t misagent_client_start_service(idevice_t device, misagent_client_t * client, const char* label)
+LIBIMOBILEDEVICE_API misagent_error_t misagent_client_start_service(idevice_t device, misagent_client_t * client, const char* label)
 {
 	misagent_error_t err = MISAGENT_E_UNKNOWN_ERROR;
 	service_client_factory_start_service(device, MISAGENT_SERVICE_NAME, (void**)client, label, SERVICE_CONSTRUCTOR(misagent_client_new), &err);
 	return err;
 }
 
-misagent_error_t misagent_client_free(misagent_client_t client)
+LIBIMOBILEDEVICE_API misagent_error_t misagent_client_free(misagent_client_t client)
 {
 	if (!client)
 		return MISAGENT_E_INVALID_ARG;
@@ -125,7 +125,7 @@ misagent_error_t misagent_client_free(misagent_client_t client)
 	return err;
 }
 
-misagent_error_t misagent_install(misagent_client_t client, plist_t profile)
+LIBIMOBILEDEVICE_API misagent_error_t misagent_install(misagent_client_t client, plist_t profile)
 {
 	if (!client || !client->parent || !profile || (plist_get_node_type(profile) != PLIST_DATA))
 		return MISAGENT_E_INVALID_ARG;
@@ -162,7 +162,7 @@ misagent_error_t misagent_install(misagent_client_t client, plist_t profile)
 	return res;
 }
 
-misagent_error_t misagent_copy(misagent_client_t client, plist_t* profiles)
+LIBIMOBILEDEVICE_API misagent_error_t misagent_copy(misagent_client_t client, plist_t* profiles)
 {
 	if (!client || !client->parent || !profiles)
 		return MISAGENT_E_INVALID_ARG;
@@ -202,7 +202,7 @@ misagent_error_t misagent_copy(misagent_client_t client, plist_t* profiles)
 
 }
 
-misagent_error_t misagent_remove(misagent_client_t client, const char* profileID)
+LIBIMOBILEDEVICE_API misagent_error_t misagent_remove(misagent_client_t client, const char* profileID)
 {
 	if (!client || !client->parent || !profileID)
 		return MISAGENT_E_INVALID_ARG;
@@ -239,7 +239,7 @@ misagent_error_t misagent_remove(misagent_client_t client, const char* profileID
 	return res;
 }
 
-int misagent_get_status_code(misagent_client_t client)
+LIBIMOBILEDEVICE_API int misagent_get_status_code(misagent_client_t client)
 {
 	if (!client) {
 		return -1;

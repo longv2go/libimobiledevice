@@ -8,15 +8,15 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA 
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include <stdio.h>
@@ -35,7 +35,7 @@ static const char *domains[] = {
 	"com.apple.disk_usage",
 	"com.apple.disk_usage.factory",
 	"com.apple.mobile.battery",
-/* FIXME: For some reason lockdownd segfaults on this, works sometimes though 
+/* FIXME: For some reason lockdownd segfaults on this, works sometimes though
 	"com.apple.mobile.debug",. */
 	"com.apple.iqagent",
 	"com.apple.purplebuddy",
@@ -81,7 +81,7 @@ static void print_usage(int argc, char **argv)
 {
 	int i = 0;
 	char *name = NULL;
-	
+
 	name = strrchr(argv[0], '/');
 	printf("Usage: %s [OPTIONS]\n", (name ? name + 1: argv[0]));
 	printf("Show information about a connected device.\n\n");
@@ -98,11 +98,13 @@ static void print_usage(int argc, char **argv)
 		printf("  %s\n", domains[i++]);
 	}
 	printf("\n");
+	printf("Homepage: <http://libimobiledevice.org>\n");
 }
 
 int main(int argc, char *argv[])
 {
 	lockdownd_client_t client = NULL;
+	lockdownd_error_t ldret = LOCKDOWN_E_UNKNOWN_ERROR;
 	idevice_t device = NULL;
 	idevice_error_t ret = IDEVICE_E_UNKNOWN_ERROR;
 	int i;
@@ -179,9 +181,10 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	if (LOCKDOWN_E_SUCCESS != (simple ?
+	if (LOCKDOWN_E_SUCCESS != (ldret = simple ?
 			lockdownd_client_new(device, &client, "ideviceinfo"):
 			lockdownd_client_new_with_handshake(device, &client, "ideviceinfo"))) {
+		fprintf(stderr, "ERROR: Could not connect to lockdownd, error code %d\n", ldret);
 		idevice_free(device);
 		return -1;
 	}

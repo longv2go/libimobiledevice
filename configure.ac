@@ -1,9 +1,9 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.61)
-AC_INIT(libimobiledevice, 1.1.7, nospam@nowhere.com)
-AM_INIT_AUTOMAKE([dist-bzip2 no-dist-gzip])
+AC_PREREQ(2.64)
+AC_INIT([libimobiledevice], [1.2.1], [https://github.com/libimobiledevice/libimobiledevice/issues],, [http://libimobiledevice.org])
+AM_INIT_AUTOMAKE([dist-bzip2 no-dist-gzip check-news])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES])
 AC_CONFIG_SRCDIR([src/])
 AC_CONFIG_HEADERS([config.h])
@@ -15,16 +15,16 @@ dnl libtool versioning
 #                 changes to the signature and the semantic)
 #  ? :+1 : ?   == just internal changes
 # CURRENT : REVISION : AGE
-LIBIMOBILEDEVICE_SO_VERSION=4:1:0
+LIBIMOBILEDEVICE_SO_VERSION=6:0:0
 
 dnl Minimum package versions
-LIBPLIST_VERSION=1.11
 LIBUSBMUXD_VERSION=1.0.9
+LIBPLIST_VERSION=1.11
 LIBPLISTMM_VERSION=1.11
 
 AC_SUBST(LIBIMOBILEDEVICE_SO_VERSION)
-AC_SUBST(LIBPLIST_VERSION)
 AC_SUBST(LIBUSBMUXD_VERSION)
+AC_SUBST(LIBPLIST_VERSION)
 AC_SUBST(LIBPLISTMM_VERSION)
 
 # Checks for programs.
@@ -156,26 +156,6 @@ else
   AC_SUBST(ssl_requires)
 fi
 
-AC_ARG_ENABLE([dev-tools],
-            [AS_HELP_STRING([--enable-dev-tools],
-            [build development helper tools (default is no)])],
-            [build_dev_tools=true],
-            [build_dev_tools=false])
-if test "$build_dev_tools" = true; then
-            DEV_SUB=dev
-            AC_CHECK_HEADERS([readline/readline.h],
-			     [],
-			     [AC_MSG_ERROR([Please install readline development headers])]
-	    )
-	    building_dev_tools=yes
-else
-            DEV_SUB=
-	    building_dev_tools=no
-fi
-
-AM_CONDITIONAL([ENABLE_DEVTOOLS],[test "x$DEV_SUB" = "xdev"])
-AC_SUBST([DEV_SUB])
-
 AC_ARG_ENABLE([debug-code],
             [AS_HELP_STRING([--enable-debug-code],
             [enable debug message reporting in library (default is no)])],
@@ -188,8 +168,13 @@ else
 	building_debug_code=yes
 fi
 
-AS_COMPILER_FLAGS(GLOBAL_CFLAGS, "-Wall -Wextra -Wmissing-declarations -Wredundant-decls -Wshadow -Wpointer-arith  -Wwrite-strings -Wswitch-default -Wno-unused-parameter -fsigned-char")
+AS_COMPILER_FLAGS(GLOBAL_CFLAGS, "-Wall -Wextra -Wmissing-declarations -Wredundant-decls -Wshadow -Wpointer-arith  -Wwrite-strings -Wswitch-default -Wno-unused-parameter -fsigned-char -fvisibility=hidden")
 AC_SUBST(GLOBAL_CFLAGS)
+
+case "$GLOBAL_CFLAGS" in
+  *-fvisibility=hidden*)
+    AC_DEFINE([HAVE_FVISIBILITY], [1], [Define if compiled with -fvisibility=hidden])
+esac
 
 # check for large file support
 AC_SYS_LARGEFILE
@@ -224,12 +209,11 @@ AC_OUTPUT([
 Makefile
 common/Makefile
 src/Makefile
+src/libimobiledevice-1.0.pc
 include/Makefile
-dev/Makefile
 tools/Makefile
 cython/Makefile
 docs/Makefile
-libimobiledevice-1.0.pc
 doxygen.cfg
 ])
 
@@ -239,7 +223,6 @@ Configuration for $PACKAGE $VERSION:
 
   Install prefix: .........: $prefix
   Debug code ..............: $building_debug_code
-  Dev tools ...............: $building_dev_tools
   Python bindings .........: $cython_python_bindings
   SSL support backend .....: $ssl_provider
 

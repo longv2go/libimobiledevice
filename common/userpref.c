@@ -159,7 +159,7 @@ const char *userpref_get_config_dir()
 	__config_dir = string_concat(base_config_dir, DIR_SEP_S, USERPREF_CONFIG_DIR, NULL);
 
 	if (__config_dir) {
-		int i = strlen(__config_dir)-1;	
+		int i = strlen(__config_dir)-1;
 		while ((i > 0) && (__config_dir[i] == DIR_SEP)) {
 			__config_dir[i--] = '\0';
 		}
@@ -173,18 +173,21 @@ const char *userpref_get_config_dir()
 }
 
 /**
- * Reads the BUID from a previously generated configuration file.
+ * Reads the SystemBUID from a previously generated configuration file.
  *
- * @note It is the responsibility of the calling function to free the returned system_buid
- * @param system_buid A null terminated string containing a valid SystemBUID.
- * @return 1 if the system buid could be retrieved or 0 otherwise.
+ * @note It is the responsibility of the calling function to free the returned system_buid.
+ * @param system_buid A pointer that will be set to a newly allocated string containing the
+ *   SystemBUID upon successful return.
+ * @return 0 if the SystemBUID has been successfully retrieved or < 0 otherwise.
  */
 int userpref_read_system_buid(char **system_buid)
 {
 	int res = usbmuxd_read_buid(system_buid);
-
-	debug_info("using %s as %s", *system_buid, USERPREF_SYSTEM_BUID_KEY);
-
+	if (res == 0) {
+		debug_info("using %s as %s", *system_buid, USERPREF_SYSTEM_BUID_KEY);
+	} else {
+		debug_info("could not read system buid, error %d", res);
+	}
 	return res;
 }
 
@@ -229,7 +232,7 @@ int userpref_has_pair_record(const char *udid)
  * @param count The number of UDIDs found. This parameter can be NULL if it
  *        is not required.
  *
- * @return USERPREF_E_SUCCESS on success, or USERPREF_E_INVALID_ARG if the 
+ * @return USERPREF_E_SUCCESS on success, or USERPREF_E_INVALID_ARG if the
  *         list parameter is not pointing to NULL.
  */
 userpref_error_t userpref_get_paired_udids(char ***list, unsigned int *count)
@@ -488,7 +491,7 @@ userpref_error_t pair_record_generate_keys_and_certs(plist_t pair_record, key_da
 		X509_set_notAfter(host_cert, asn1time);
 		ASN1_TIME_free(asn1time);
 
-		/* use host public key for host cert */	
+		/* use host public key for host cert */
 		X509_set_pubkey(host_cert, host_pkey);
 
 		/* sign host cert with root private key */
